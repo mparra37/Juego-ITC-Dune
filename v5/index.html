@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arrakis: Ruta de la Especia — Nivel 1</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ═══ PANTALLA DE INICIO ═══ -->
+  <div id="start-screen">
+    <div class="start-bg-effects">
+      <div class="sun-glow"></div>
+      <div class="sand-drift drift-1"></div>
+      <div class="sand-drift drift-2"></div>
+      <div class="sand-drift drift-3"></div>
+    </div>
+
+    <div class="title-container">
+      <div class="subtitle">Taller de Ingeniería en Tecnologías Computacionales</div>
+      <div class="main-title">ARRAKIS</div>
+      <div class="title-deco">━━━ ◆ ━━━</div>
+      <div class="level-label">Nivel 1 · Ruta de la Especia</div>
+    </div>
+
+    <div class="mission-text">
+      Eres un joven Fremen perdido en el desierto profundo de Arrakis.
+      Debes llegar al depósito de especia antes de que <strong>Shai-Hulud</strong>,
+      el gran gusano de arena, te devore. Recoge la especia melange en tu camino.
+      <em>El que controla la especia, controla el universo.</em>
+    </div>
+
+    <div class="mode-select">
+      <button class="mode-btn manual-btn" onclick="startGame('manual')">
+        <span class="btn-icon">⌨</span>
+        <span class="btn-label">Control Manual</span>
+        <span class="btn-desc">Mueve con las flechas</span>
+      </button>
+      <button class="mode-btn code-btn" onclick="startGame('code')">
+        <span class="btn-icon">{ }</span>
+        <span class="btn-label">Programar Ruta</span>
+        <span class="btn-desc">Escribe tu algoritmo</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══ CONTENEDOR DEL JUEGO ═══ -->
+  <div id="game-container">
+
+    <!-- HEADER -->
+    <header id="game-header">
+      <div class="header-left">
+        <div class="header-title">ARRAKIS</div>
+        <div class="header-level">NIVEL 1</div>
+      </div>
+      <div class="header-stats">
+        <div class="stat">
+          <span class="stat-icon">◆</span>
+          <span class="stat-value" id="spice-count">0</span>
+          <span class="stat-label">/ 3 ESPECIA</span>
+        </div>
+        <div class="stat">
+          <span class="stat-icon">↦</span>
+          <span class="stat-value blue" id="step-count">0</span>
+          <span class="stat-label">PASOS</span>
+        </div>
+        <div class="stat mode-stat">
+          <span class="stat-value" id="mode-label">MANUAL</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- CANVAS -->
+    <div id="game-canvas-wrap">
+      <canvas id="gameCanvas"></canvas>
+
+      <!-- Overlay de muerte -->
+      <div id="death-overlay">
+        <div class="death-content">
+          <div class="death-worm-art">
+            <svg viewBox="0 0 120 80" class="worm-death-svg">
+              <ellipse cx="60" cy="50" rx="50" ry="25" fill="#5d4037" opacity="0.5"/>
+              <circle cx="60" cy="35" r="28" fill="#5d4037"/>
+              <circle cx="60" cy="35" r="22" fill="#6d4c41"/>
+              <circle cx="48" cy="28" r="5" fill="#ff1744"/>
+              <circle cx="72" cy="28" r="5" fill="#ff1744"/>
+              <circle cx="48" cy="27" r="2" fill="#fff"/>
+              <circle cx="72" cy="27" r="2" fill="#fff"/>
+              <path d="M 45 42 Q 53 55 60 42 Q 67 55 75 42" stroke="#ff1744" stroke-width="2.5" fill="none"/>
+              <line x1="47" y1="46" x2="52" y2="42" stroke="#ffcdd2" stroke-width="1.5"/>
+              <line x1="54" y1="48" x2="56" y2="43" stroke="#ffcdd2" stroke-width="1.5"/>
+              <line x1="64" y1="43" x2="66" y2="48" stroke="#ffcdd2" stroke-width="1.5"/>
+              <line x1="68" y1="42" x2="73" y2="46" stroke="#ffcdd2" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div class="death-title">SHAI-HULUD TE HA DEVORADO</div>
+          <div class="death-sub">El gusano de arena no tiene piedad. Estudia su ruta de patrulla e inténtalo de nuevo.</div>
+          <div class="death-stats">
+            <span>Pasos dados: <strong id="death-steps">0</strong></span>
+            <span>Especia: <strong id="death-spice">0</strong></span>
+          </div>
+          <button class="retry-btn" onclick="resetGame()">INTENTAR DE NUEVO</button>
+        </div>
+      </div>
+
+      <!-- Overlay de victoria -->
+      <div id="win-overlay">
+        <div class="win-content">
+          <div class="win-spice-icon">◆</div>
+          <div class="win-title">¡ESPECIA ENCONTRADA!</div>
+          <div class="win-sub" id="win-msg">Has completado el Nivel 1</div>
+          <div class="win-actions">
+            <button class="retry-btn" onclick="resetGame()">JUGAR DE NUEVO</button>
+            <button class="retry-btn outline" onclick="backToMenu()">MENÚ</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL DE CÓDIGO -->
+    <div id="editor-panel">
+      <div class="editor-header">
+        <span class="editor-title">// CONSOLA FREMEN</span>
+        <span class="editor-status" id="editor-status">LISTO</span>
+      </div>
+
+      <div class="editor-help">
+        <div class="help-title">Comandos disponibles:</div>
+        <div class="cmd-grid">
+          <code>arriba(n)</code><span>↑ mover n celdas</span>
+          <code>abajo(n)</code><span>↓ mover n celdas</span>
+          <code>izquierda(n)</code><span>← mover n celdas</span>
+          <code>derecha(n)</code><span>→ mover n celdas</span>
+          <code>esperar(n)</code><span>⏸ esperar n turnos</span>
+        </div>
+      </div>
+
+      <textarea id="code-editor" spellcheck="false" placeholder="// Escribe tu algoritmo aquí...
+// Ejemplo:
+derecha(5)
+abajo(3)
+derecha(4)"></textarea>
+
+      <div id="console-output"></div>
+
+      <div class="editor-actions">
+        <button class="action-btn run" onclick="runCode()">▶ EJECUTAR</button>
+        <button class="action-btn stop" onclick="stopCode()">■ DETENER</button>
+        <button class="action-btn reset" onclick="resetGame()">↺ REINICIAR</button>
+      </div>
+
+      <!-- Botón de solución -->
+      <div class="solution-section">
+        <button class="solution-toggle" onclick="toggleSolutionInput()">
+          🔑 Mostrar Solución
+        </button>
+        <div id="solution-input-wrap" class="solution-input-wrap">
+          <input type="password" id="solution-code" placeholder="Código de acceso..." maxlength="10">
+          <button class="solution-submit" onclick="checkSolutionCode()">→</button>
+        </div>
+        <div id="solution-error" class="solution-error"></div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer id="game-footer">
+      <div class="footer-hint" id="footer-hint">Usa las flechas ↑ ↓ ← → para moverte</div>
+      <div class="footer-controls">
+        <button class="ctrl-btn" onclick="toggleSolutionFromFooter()">🔑 SOLUCIÓN</button>
+        <button class="ctrl-btn" onclick="resetGame()">REINICIAR</button>
+        <button class="ctrl-btn" onclick="backToMenu()">MENÚ</button>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ═══ MODAL DE SOLUCIÓN (modo manual) ═══ -->
+  <div id="solution-modal">
+    <div class="solution-modal-content">
+      <div class="solution-modal-header">
+        <span>🔑 Código de Acceso</span>
+        <button class="solution-modal-close" onclick="closeSolutionModal()">✕</button>
+      </div>
+      <p class="solution-modal-desc">Ingresa el código proporcionado por tu instructor para ver la solución.</p>
+      <div class="solution-modal-input-wrap">
+        <input type="password" id="solution-code-modal" placeholder="Código..." maxlength="10">
+        <button class="solution-submit" onclick="checkSolutionCodeModal()">VERIFICAR</button>
+      </div>
+      <div id="solution-error-modal" class="solution-error"></div>
+      <div id="solution-reveal-modal" class="solution-reveal"></div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>

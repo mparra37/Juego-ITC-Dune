@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dune: Spice Hunt</title>
+    <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+    <div id="game-container">
+        <h1>☀ Dune: Spice Hunt ☀</h1>
+
+        <div id="hud" class="hidden">
+            <span id="level-name">◈ Lv.1</span>
+            <span>Especia: <b id="spice-count">0/0</b></span>
+            <span>Pts: <b id="score">0</b></span>
+            <span id="lives">♦♦♦</span>
+        </div>
+
+        <div class="main-layout">
+            <div id="board-wrapper">
+                <div id="svg-host"></div>
+                
+                <div id="menu-overlay" class="overlay">
+                    <div style="font-size: 48px;">🪱</div>
+                    <p>Recolecta la especia antes de que Shai-Hulud te devore.</p>
+                    <button id="start-btn" class="rbtn">Iniciar Misión</button>
+                </div>
+
+                <div id="message-overlay" class="overlay hidden"></div>
+            </div>
+
+            <div class="side-panel">
+                <div class="editor-container">
+                    <div class="editor-header">
+                        <span>⌨ Terminal Fremen</span>
+                        <span id="status-msg"></span>
+                    </div>
+                    <textarea id="code-area" placeholder="Escribe comandos..."></textarea>
+                    <button id="run-btn" class="rbtn">▶ Ejecutar Código</button>
+                </div>
+
+                <div class="controls-hint">
+                    <div><code class="gold">derecha</code>, <code class="gold">izquierda</code>...</div>
+                    <div><code class="orange">repetir(N)</code> / <code class="orange">fin</code></div>
+                </div>
+
+                <div class="dpad">
+                    <div style="font-size: 10px; color: #6b5335; margin-bottom: 5px;">CONTROL MANUAL</div>
+                    <div class="dpad-grid">
+                        <div></div><button class="gbtn" data-dir="arriba">↑</button><div></div>
+                        <button class="gbtn" data-dir="izquierda">←</button>
+                        <div class="dpad-center">◆</div>
+                        <button class="gbtn" data-dir="derecha">→</button>
+                        <div></div><button class="gbtn" data-dir="abajo">↓</button><div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script2.js"></script>
+</body>
+</html>
