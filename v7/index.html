@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Arrakis: Ruta de la Especia</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ═══ INICIO ═══ -->
+  <div id="start-screen">
+    <div class="start-bg-effects"><div class="sun-glow"></div><div class="sand-drift drift-1"></div><div class="sand-drift drift-2"></div></div>
+    <div class="title-container">
+      <div class="subtitle">Taller de Ingeniería en Tecnologías Computacionales</div>
+      <div class="main-title">ARRAKIS</div>
+      <div class="title-deco">━━━ ◆ ━━━</div>
+      <div class="level-label">Ruta de la Especia · 5 Niveles</div>
+    </div>
+    <div class="mission-text">
+      Eres un joven Fremen en el desierto de Arrakis.
+      Recolecta <strong>toda la especia</strong> antes de que <strong>Shai-Hulud</strong> te devore.
+      <strong>Escóndete en las montañas</strong> — el gusano no detecta pisadas sobre roca.
+      <em>El que controla la especia, controla el universo.</em>
+    </div>
+    <div class="mode-select">
+      <button class="mode-btn manual-btn" onclick="startGame('manual')">
+        <span class="btn-icon">⌨</span>
+        <span class="btn-label">Control Manual</span>
+        <span class="btn-desc">Flechas / Touch</span>
+      </button>
+      <button class="mode-btn code-btn" onclick="startGame('code')">
+        <span class="btn-icon">{ }</span>
+        <span class="btn-label">Programar Ruta</span>
+        <span class="btn-desc">Bloques + Código</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══ JUEGO ═══ -->
+  <div id="game-container">
+    <header id="game-header">
+      <div class="header-left">
+        <div class="header-title">ARRAKIS</div>
+        <div class="header-level" id="header-level-text">NIVEL 1</div>
+      </div>
+      <div class="header-stats">
+        <div class="stat"><span class="stat-icon">◆</span><span class="stat-value" id="spice-count">0</span><span class="stat-label" id="spice-total">/ 3</span></div>
+        <div class="stat"><span class="stat-icon">↦</span><span class="stat-value blue" id="step-count">0</span><span class="stat-label">PASOS</span></div>
+        <div class="stat" id="hide-stat" style="display:none"><span class="stat-value green">⛰ OCULTO</span></div>
+        <div class="stat"><span class="stat-icon">☠</span><span class="stat-value danger" id="worm-speed-label">LENTO</span></div>
+        <div class="stat mode-stat"><span class="stat-value" id="mode-label">MANUAL</span></div>
+        <button class="icon-btn" id="music-btn" onclick="toggleMusic()" title="Música">♪</button>
+        <button class="icon-btn" id="pause-btn" onclick="togglePause()" title="Pausa">⏸</button>
+      </div>
+    </header>
+
+    <div id="game-main">
+      <!-- CANVAS -->
+      <div id="game-canvas-wrap">
+        <canvas id="gameCanvas"></canvas>
+        <!-- D-PAD -->
+        <div id="dpad" class="dpad">
+          <button class="dpad-btn dpad-up" ontouchstart="dpadPress(0,-1,event)" onmousedown="dpadPress(0,-1,event)">▲</button>
+          <button class="dpad-btn dpad-left" ontouchstart="dpadPress(-1,0,event)" onmousedown="dpadPress(-1,0,event)">◀</button>
+          <button class="dpad-btn dpad-right" ontouchstart="dpadPress(1,0,event)" onmousedown="dpadPress(1,0,event)">▶</button>
+          <button class="dpad-btn dpad-down" ontouchstart="dpadPress(0,1,event)" onmousedown="dpadPress(0,1,event)">▼</button>
+        </div>
+        <!-- Overlays -->
+        <div id="grace-overlay"><div class="grace-text" id="grace-text">3</div></div>
+        <div id="pause-overlay"><div class="pause-content"><div class="pause-icon">⏸</div><div class="pause-title">PAUSA</div><button class="retry-btn" onclick="togglePause()">CONTINUAR</button></div></div>
+        <div id="death-overlay">
+          <div class="death-content">
+            <svg viewBox="0 0 120 80" class="worm-death-svg"><ellipse cx="60" cy="50" rx="50" ry="25" fill="#5d4037" opacity=".5"/><circle cx="60" cy="35" r="28" fill="#5d4037"/><circle cx="60" cy="35" r="22" fill="#6d4c41"/><circle cx="48" cy="28" r="5" fill="#ff1744"/><circle cx="72" cy="28" r="5" fill="#ff1744"/><circle cx="48" cy="27" r="2" fill="#fff"/><circle cx="72" cy="27" r="2" fill="#fff"/><path d="M 45 42 Q 53 55 60 42 Q 67 55 75 42" stroke="#ff1744" stroke-width="2.5" fill="none"/></svg>
+            <div class="death-title">SHAI-HULUD TE HA DEVORADO</div>
+            <div class="death-sub">¡Escóndete en las montañas!</div>
+            <div class="death-stats"><span>Pasos: <strong id="death-steps">0</strong></span><span>Especia: <strong id="death-spice">0</strong></span></div>
+            <button class="retry-btn" onclick="resetLevel()">INTENTAR DE NUEVO</button>
+          </div>
+        </div>
+        <div id="win-overlay"><div class="win-content"><div class="win-spice-icon">◆</div><div class="win-title" id="win-title">¡NIVEL COMPLETADO!</div><div class="win-sub" id="win-msg">Completado</div><div class="win-actions"><button class="retry-btn" onclick="nextLevel()">SIGUIENTE NIVEL →</button><button class="retry-btn outline" onclick="resetLevel()">REPETIR</button></div></div></div>
+        <div id="complete-overlay"><div class="win-content"><div class="win-spice-icon big">◆</div><div class="win-title gold">¡ARRAKIS CONQUISTADO!</div><div class="win-sub" id="complete-msg">Has dominado los 5 niveles</div><button class="retry-btn" onclick="backToMenu()">MENÚ PRINCIPAL</button></div></div>
+        <div id="level-announce"><div class="announce-level" id="announce-level-num">NIVEL 1</div><div class="announce-name" id="announce-level-name">El Primer Paso</div></div>
+      </div>
+
+      <!-- EDITOR -->
+      <div id="editor-panel">
+        <!-- BLOQUES DE CÓDIGO -->
+        <div class="block-palette">
+          <div class="palette-section">
+            <div class="palette-label">Movimiento</div>
+            <div class="palette-chips">
+              <button class="chip chip-move" onclick="insertBlock('arriba(3)')">↑ arriba</button>
+              <button class="chip chip-move" onclick="insertBlock('abajo(3)')">↓ abajo</button>
+              <button class="chip chip-move" onclick="insertBlock('izquierda(3)')">← izquierda</button>
+              <button class="chip chip-move" onclick="insertBlock('derecha(3)')">→ derecha</button>
+              <button class="chip chip-wait" onclick="insertBlock('esperar(2)')">⏸ esperar</button>
+            </div>
+          </div>
+          <div class="palette-section">
+            <div class="palette-label">Sensores</div>
+            <div class="palette-chips">
+              <button class="chip chip-cond" onclick="insertBlock('si_gusano_cerca(5):\n  \nfin')">☠ si gusano cerca</button>
+              <button class="chip chip-cond" onclick="insertBlock('si_especia(derecha,8):\n  \nfin')">◆ si especia</button>
+              <button class="chip chip-cond" onclick="insertBlock('si_oculto():\n  \nfin')">⛰ si oculto</button>
+              <button class="chip chip-else" onclick="insertBlock('sino:\n  ')">↪ sino</button>
+            </div>
+          </div>
+          <div class="palette-section">
+            <div class="palette-label">Lógica</div>
+            <div class="palette-chips">
+              <button class="chip chip-loop" onclick="insertBlock('repetir(3):\n  \nfin')">🔁 repetir</button>
+              <button class="chip chip-combo" onclick="insertBlock('si_gusano_cerca(4):\n  arriba(2)\n  esperar(3)\n  abajo(2)\nsino:\n  derecha(2)\nfin')">⚡ esquivar gusano</button>
+              <button class="chip chip-combo" onclick="insertBlock('repetir(5):\n  si_especia(derecha,8):\n    derecha(2)\n  sino:\n    abajo(1)\n  fin\nfin')">🔍 buscar especia</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="editor-body">
+          <div class="editor-toolbar">
+            <span class="editor-title">// CÓDIGO</span>
+            <span class="editor-status" id="editor-status">LISTO</span>
+            <button class="toolbar-btn" onclick="clearEditor()" title="Limpiar">🗑</button>
+          </div>
+          <textarea id="code-editor" spellcheck="false" placeholder="// Toca los bloques de arriba para insertar código
+// o escribe directamente aquí
+
+// Ejemplo:
+derecha(5)
+si_gusano_cerca(4):
+  arriba(2)
+fin"></textarea>
+          <div id="console-output"></div>
+        </div>
+
+        <div class="editor-bottom">
+          <div class="editor-actions">
+            <button class="action-btn run" onclick="runCode()">▶ EJECUTAR</button>
+            <button class="action-btn stop" onclick="stopCode()">■ STOP</button>
+            <button class="action-btn reset" onclick="resetLevel()">↺</button>
+          </div>
+          <div class="solution-section">
+            <button class="solution-toggle" onclick="toggleSolutionInput()">🔑 Solución</button>
+            <div id="solution-input-wrap" class="solution-input-wrap">
+              <input type="password" id="solution-code" placeholder="Código..." maxlength="10">
+              <button class="solution-submit" onclick="checkSolutionCode()">→</button>
+            </div>
+            <div id="solution-error" class="solution-error"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer id="game-footer">
+      <div class="footer-hint" id="footer-hint">⛰ Montañas = refugio · ◆ Recoge toda la especia</div>
+      <div class="footer-controls">
+        <button class="ctrl-btn" onclick="toggleSolutionFromFooter()">🔑</button>
+        <button class="ctrl-btn" onclick="togglePause()">⏸</button>
+        <button class="ctrl-btn" onclick="resetLevel()">↺</button>
+        <button class="ctrl-btn" onclick="backToMenu()">MENÚ</button>
+      </div>
+    </footer>
+  </div>
+
+  <!-- MODAL SOLUCIÓN -->
+  <div id="solution-modal">
+    <div class="solution-modal-content">
+      <div class="solution-modal-header"><span>🔑 Código de Acceso</span><button class="solution-modal-close" onclick="closeSolutionModal()">✕</button></div>
+      <p class="solution-modal-desc">Ingresa el código del instructor.</p>
+      <div class="solution-modal-input-wrap">
+        <input type="password" id="solution-code-modal" placeholder="Código..." maxlength="10">
+        <button class="solution-submit" onclick="checkSolutionCodeModal()">VERIFICAR</button>
+      </div>
+      <div id="solution-error-modal" class="solution-error"></div>
+      <div id="solution-reveal-modal" class="solution-reveal"></div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
