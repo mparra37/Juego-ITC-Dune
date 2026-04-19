@@ -142,7 +142,10 @@ function genTex(){
 
 // ═══ LEVEL SELECT ═══
 function buildLS(){const g=document.getElementById('ls-grid');g.innerHTML='';for(let i=1;i<=10;i++){const l=LV[i],c=document.createElement('div');c.className='ls-card';c.innerHTML=`<div class="ls-num">${i}</div><div class="ls-worms">🪱×${l.worms.length}</div><div class="ls-spice">◆${l.sp.length}</div>`;c.onclick=()=>{closeLevelSelect();lvl=i;startFromLevel()};g.appendChild(c)}}
-function selectLevel(){buildLS();document.getElementById('level-select').classList.add('on')}
+function selectLevel(){
+  //buildLS();document.getElementById('level-select').classList.add('on')
+  window.location.href = "http://mparra37.github.io/dune";
+}
 function closeLevelSelect(){document.getElementById('level-select').classList.remove('on')}
 
 function init(){cv=document.getElementById('c');cx=cv.getContext('2d');cv.width=W;cv.height=H;resize()}
