@@ -9,23 +9,27 @@
 </head>
 <body>
 
+<!-- ═══ INICIO ═══ -->
 <div id="start-screen">
   <div class="start-bg"><div class="start-sun"></div><div class="start-dunes"></div></div>
   <div class="start-content">
     <p class="start-sub">Taller de Ingeniería en Tecnologías Computacionales</p>
     <h1 class="start-title">ARRAKIS</h1>
     <div class="start-line">━━ ◆ ━━</div>
-    <p class="start-level-preview">10 NIVELES · 1–3 GUSANOS</p>
+    <p class="start-level-preview" id="start-levels">10 NIVELES · 1–3 GUSANOS</p>
     <p class="start-desc">
       Recolecta <b>toda la especia</b> en cada nivel. <b>Shai-Hulud</b> te persigue
       — escóndete en las <b>montañas</b> para que pierda tu rastro.
       Cada nivel trae más gusanos y más velocidad.
     </p>
-    <button class="start-btn" onclick="startGame()"><span class="sb-icon">🪱</span><span class="sb-text">INICIAR TRAVESÍA</span></button>
-    <button class="start-btn small" onclick="selectLevel()">ELEGIR NIVEL</button>
+    <button class="start-btn" onclick="startGame()">
+      <span class="sb-icon">🪱</span><span class="sb-text">INICIAR TRAVESÍA</span>
+    </button>
+    <!-- <button class="start-btn small" onclick="selectLevel()">ELEGIR NIVEL</button> -->
   </div>
 </div>
 
+<!-- ═══ SELECTOR DE NIVEL ═══ -->
 <div id="level-select" class="ov">
   <div class="ov-box ls-box">
     <div class="ov-title gold">ELIGE TU NIVEL</div>
@@ -34,25 +38,27 @@
   </div>
 </div>
 
+<!-- ═══ JUEGO ═══ -->
 <div id="game" class="game">
   <div id="canvas-wrap">
     <canvas id="c"></canvas>
 
+    <!-- HUD -->
     <div class="hud">
       <div class="hud-left">
         <span class="hud-lvl" id="hud-lvl">N1</span>
         <span class="hud-spice" id="hud-spice">◆ 0/3</span>
-        <span class="hud-score" id="hud-score">★ 0</span>
+        <span class="hud-steps" id="hud-steps">↦ 0</span>
       </div>
       <div class="hud-right">
         <span class="hud-tag" id="hud-hidden" style="display:none">⛰</span>
         <span class="hud-worm" id="hud-worm">☠×1</span>
-        <span class="hud-steps" id="hud-steps">↦ 0</span>
         <button class="hud-btn" onclick="toggleMusic()" id="music-btn">♪</button>
         <button class="hud-btn" onclick="togglePause()">⏸</button>
       </div>
     </div>
 
+    <!-- D-PAD -->
     <div id="dpad">
       <button class="dp u" ontouchstart="dp(0,-1,event)" onmousedown="dp(0,-1,event)" ontouchend="e(event)">▲</button>
       <button class="dp l" ontouchstart="dp(-1,0,event)" onmousedown="dp(-1,0,event)" ontouchend="e(event)">◀</button>
@@ -60,20 +66,21 @@
       <button class="dp d" ontouchstart="dp(0,1,event)" onmousedown="dp(0,1,event)" ontouchend="e(event)">▼</button>
     </div>
 
+    <!-- FABs -->
     <div class="fab-bar">
-      <button class="fab" onclick="resetLevel()">↺</button>
-      <button class="fab" onclick="backToMenu()">☰</button>
+      <button class="fab" onclick="resetLevel()" title="Reiniciar">↺</button>
+      <button class="fab" onclick="backToMenu()" title="Menú">☰</button>
     </div>
 
+    <!-- OVERLAYS -->
     <div id="ov-grace" class="ov"><div class="grace-num" id="grace-num">3</div></div>
-    <div id="ov-pause" class="ov"><div class="ov-box"><div class="ov-big">⏸</div><div class="ov-title blue">PAUSA</div><p class="ov-sub">Puntaje actual: <b id="pause-score">0</b></p><button class="ov-btn" onclick="togglePause()">CONTINUAR</button></div></div>
+    <div id="ov-pause" class="ov"><div class="ov-box"><div class="ov-big">⏸</div><div class="ov-title blue">PAUSA</div><button class="ov-btn" onclick="togglePause()">CONTINUAR</button></div></div>
     <div id="ov-death" class="ov">
       <div class="ov-box">
         <div class="ov-big">💀</div>
         <div class="ov-title red">SHAI-HULUD TE DEVORÓ</div>
         <p class="ov-sub">Escóndete en las montañas ⛰</p>
         <p class="ov-stats"><span>Pasos: <b id="d-steps">0</b></span> <span>Especia: <b id="d-spice">0</b></span></p>
-        <p class="ov-penalty" id="d-penalty">-50 puntos</p>
         <button class="ov-btn" onclick="resetLevel()">REINTENTAR</button>
       </div>
     </div>
@@ -82,21 +89,28 @@
         <div class="ov-big gold">◆</div>
         <div class="ov-title gold" id="win-t">¡NIVEL COMPLETADO!</div>
         <p class="ov-sub" id="win-m"></p>
-        <p class="ov-score-detail" id="win-detail"></p>
         <div class="ov-worm-count" id="win-warn"></div>
-        <div class="ov-row"><button class="ov-btn" onclick="nextLevel()">SIGUIENTE →</button><button class="ov-btn ghost" onclick="resetLevel()">REPETIR</button></div>
+        <div class="ov-row">
+          <button class="ov-btn" onclick="nextLevel()">SIGUIENTE →</button>
+          <button class="ov-btn ghost" onclick="resetLevel()">REPETIR</button>
+        </div>
       </div>
     </div>
     <div id="ov-end" class="ov">
       <div class="ov-box">
         <div class="ov-big gold xl">◆</div>
         <div class="ov-title gold">¡ARRAKIS CONQUISTADO!</div>
-        <p class="ov-sub">Has sobrevivido a los 10 niveles</p>
-        <div class="final-score"><span>PUNTAJE FINAL</span><b id="final-score-num">0</b></div>
+        <p class="ov-sub">Has sobrevivido a los 10 niveles.<br>Eres un verdadero Fremen.</p>
         <button class="ov-btn" onclick="backToMenu()">MENÚ PRINCIPAL</button>
       </div>
     </div>
-    <div id="ov-lvl" class="ov"><div class="ov-box"><div class="ov-title gold" id="ann-lvl">NIVEL 1</div><div class="ov-sub blue" id="ann-name">El Primer Paso</div><div class="ov-sub" id="ann-info"></div></div></div>
+    <div id="ov-lvl" class="ov">
+      <div class="ov-box">
+        <div class="ov-title gold" id="ann-lvl">NIVEL 1</div>
+        <div class="ov-sub blue" id="ann-name">El Primer Paso</div>
+        <div class="ov-sub" id="ann-info"></div>
+      </div>
+    </div>
   </div>
 </div>
 
