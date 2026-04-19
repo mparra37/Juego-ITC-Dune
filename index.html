@@ -11,36 +11,39 @@
 
 <!-- ═══ INICIO ═══ -->
 <div id="start-screen">
-  <div class="start-bg">
-    <div class="start-sun"></div>
-    <div class="start-dunes"></div>
-  </div>
+  <div class="start-bg"><div class="start-sun"></div><div class="start-dunes"></div></div>
   <div class="start-content">
     <p class="start-sub">Taller de Ingeniería en Tecnologías Computacionales</p>
     <h1 class="start-title">ARRAKIS</h1>
     <div class="start-line">━━ ◆ ━━</div>
+    <p class="start-level-preview" id="start-levels">10 NIVELES · 1–3 GUSANOS</p>
     <p class="start-desc">
       Recolecta <b>toda la especia</b> en cada nivel. <b>Shai-Hulud</b> te persigue
       — escóndete en las <b>montañas</b> para que pierda tu rastro.
+      Cada nivel trae más gusanos y más velocidad.
     </p>
-    <div class="start-modes">
-      <button class="start-btn" onclick="startGame('manual')">
-        <span class="sb-icon">🎮</span><span class="sb-text">Control Manual</span>
-      </button>
-      <button class="start-btn alt" onclick="startGame('code')">
-        <span class="sb-icon">💻</span><span class="sb-text">Programar</span>
-      </button>
-    </div>
+    <button class="start-btn" onclick="startGame()">
+      <span class="sb-icon">🪱</span><span class="sb-text">INICIAR TRAVESÍA</span>
+    </button>
+    <!-- <button class="start-btn small" onclick="selectLevel()">ELEGIR NIVEL</button> -->
+  </div>
+</div>
+
+<!-- ═══ SELECTOR DE NIVEL ═══ -->
+<div id="level-select" class="ov">
+  <div class="ov-box ls-box">
+    <div class="ov-title gold">ELIGE TU NIVEL</div>
+    <div class="ls-grid" id="ls-grid"></div>
+    <button class="ov-btn ghost" onclick="closeLevelSelect()">VOLVER</button>
   </div>
 </div>
 
 <!-- ═══ JUEGO ═══ -->
 <div id="game" class="game">
-  <!-- CANVAS (siempre llena) -->
   <div id="canvas-wrap">
     <canvas id="c"></canvas>
 
-    <!-- HUD flotante -->
+    <!-- HUD -->
     <div class="hud">
       <div class="hud-left">
         <span class="hud-lvl" id="hud-lvl">N1</span>
@@ -49,7 +52,7 @@
       </div>
       <div class="hud-right">
         <span class="hud-tag" id="hud-hidden" style="display:none">⛰</span>
-        <span class="hud-worm" id="hud-worm">☠ LENTO</span>
+        <span class="hud-worm" id="hud-worm">☠×1</span>
         <button class="hud-btn" onclick="toggleMusic()" id="music-btn">♪</button>
         <button class="hud-btn" onclick="togglePause()">⏸</button>
       </div>
@@ -57,87 +60,57 @@
 
     <!-- D-PAD -->
     <div id="dpad">
-      <button class="dp u" ontouchstart="dp(0,-1,event)" onmousedown="dp(0,-1,event)" ontouchend="event.preventDefault()">▲</button>
-      <button class="dp l" ontouchstart="dp(-1,0,event)" onmousedown="dp(-1,0,event)" ontouchend="event.preventDefault()">◀</button>
-      <button class="dp r" ontouchstart="dp(1,0,event)" onmousedown="dp(1,0,event)" ontouchend="event.preventDefault()">▶</button>
-      <button class="dp d" ontouchstart="dp(0,1,event)" onmousedown="dp(0,1,event)" ontouchend="event.preventDefault()">▼</button>
+      <button class="dp u" ontouchstart="dp(0,-1,event)" onmousedown="dp(0,-1,event)" ontouchend="e(event)">▲</button>
+      <button class="dp l" ontouchstart="dp(-1,0,event)" onmousedown="dp(-1,0,event)" ontouchend="e(event)">◀</button>
+      <button class="dp r" ontouchstart="dp(1,0,event)" onmousedown="dp(1,0,event)" ontouchend="e(event)">▶</button>
+      <button class="dp d" ontouchstart="dp(0,1,event)" onmousedown="dp(0,1,event)" ontouchend="e(event)">▼</button>
     </div>
 
-    <!-- Botones flotantes -->
+    <!-- FABs -->
     <div class="fab-bar">
-      <button class="fab" onclick="resetLevel()">↺</button>
-      <button class="fab" onclick="backToMenu()">☰</button>
-      <button class="fab" id="fab-code" onclick="toggleEditor()" style="display:none">{ }</button>
-      <button class="fab" onclick="toggleSolutionFromFooter()">🔑</button>
+      <button class="fab" onclick="resetLevel()" title="Reiniciar">↺</button>
+      <button class="fab" onclick="backToMenu()" title="Menú">☰</button>
     </div>
 
     <!-- OVERLAYS -->
-    <div id="ov-grace" class="ov"><div class="ov-big" id="grace-num">3</div></div>
+    <div id="ov-grace" class="ov"><div class="grace-num" id="grace-num">3</div></div>
     <div id="ov-pause" class="ov"><div class="ov-box"><div class="ov-big">⏸</div><div class="ov-title blue">PAUSA</div><button class="ov-btn" onclick="togglePause()">CONTINUAR</button></div></div>
-    <div id="ov-death" class="ov"><div class="ov-box"><div class="ov-big">💀</div><div class="ov-title red">SHAI-HULUD TE DEVORÓ</div><p class="ov-sub">Escóndete en las montañas ⛰</p><p class="ov-stats"><span>Pasos: <b id="d-steps">0</b></span> <span>Especia: <b id="d-spice">0</b></span></p><button class="ov-btn" onclick="resetLevel()">REINTENTAR</button></div></div>
-    <div id="ov-win" class="ov"><div class="ov-box"><div class="ov-big gold">◆</div><div class="ov-title gold" id="win-t">¡NIVEL COMPLETADO!</div><p class="ov-sub" id="win-m"></p><div class="ov-row"><button class="ov-btn" onclick="nextLevel()">SIGUIENTE →</button><button class="ov-btn ghost" onclick="resetLevel()">REPETIR</button></div></div></div>
-    <div id="ov-end" class="ov"><div class="ov-box"><div class="ov-big gold xl">◆</div><div class="ov-title gold">¡ARRAKIS CONQUISTADO!</div><p class="ov-sub">Eres un verdadero Fremen</p><button class="ov-btn" onclick="backToMenu()">MENÚ</button></div></div>
-    <div id="ov-lvl" class="ov"><div class="ov-box"><div class="ov-title gold" id="ann-lvl">NIVEL 1</div><div class="ov-sub blue" id="ann-name">El Primer Paso</div></div></div>
-  </div>
-
-  <!-- EDITOR (panel lateral en desktop, bottom-sheet en móvil) -->
-  <div id="editor" class="editor">
-    <div class="editor-handle" onclick="toggleEditor()"><span></span></div>
-    <!-- Bloques -->
-    <div class="blocks">
-      <div class="bk-row">
-        <span class="bk-label">MOV</span>
-        <button class="bk m" onclick="ins('arriba(3)')">↑</button>
-        <button class="bk m" onclick="ins('abajo(3)')">↓</button>
-        <button class="bk m" onclick="ins('izquierda(3)')">←</button>
-        <button class="bk m" onclick="ins('derecha(3)')">→</button>
-        <button class="bk w" onclick="ins('esperar(2)')">⏸</button>
-      </div>
-      <div class="bk-row">
-        <span class="bk-label">SI</span>
-        <button class="bk c" onclick="ins('si_gusano_cerca(5):\n  \nfin')">☠ gusano</button>
-        <button class="bk c" onclick="ins('si_especia(derecha,8):\n  \nfin')">◆ especia</button>
-        <button class="bk c" onclick="ins('si_oculto():\n  \nfin')">⛰ oculto</button>
-        <button class="bk e" onclick="ins('sino:\n  ')">↪ sino</button>
-      </div>
-      <div class="bk-row">
-        <span class="bk-label">+</span>
-        <button class="bk lp" onclick="ins('repetir(3):\n  \nfin')">🔁 repetir</button>
-        <button class="bk cb" onclick="ins('si_gusano_cerca(4):\n  arriba(2)\n  esperar(3)\n  abajo(2)\nsino:\n  derecha(2)\nfin')">⚡ esquivar</button>
-        <button class="bk cb" onclick="ins('repetir(5):\n  si_especia(derecha,8):\n    derecha(2)\n  sino:\n    abajo(1)\n  fin\nfin')">🔍 buscar</button>
+    <div id="ov-death" class="ov">
+      <div class="ov-box">
+        <div class="ov-big">💀</div>
+        <div class="ov-title red">SHAI-HULUD TE DEVORÓ</div>
+        <p class="ov-sub">Escóndete en las montañas ⛰</p>
+        <p class="ov-stats"><span>Pasos: <b id="d-steps">0</b></span> <span>Especia: <b id="d-spice">0</b></span></p>
+        <button class="ov-btn" onclick="resetLevel()">REINTENTAR</button>
       </div>
     </div>
-    <!-- Code -->
-    <textarea id="code" spellcheck="false" placeholder="// Toca bloques o escribe aquí
-derecha(5)
-si_gusano_cerca(4):
-  arriba(2)
-fin"></textarea>
-    <div id="console"></div>
-    <!-- Actions -->
-    <div class="ed-actions">
-      <button class="ea run" onclick="runCode()">▶ Ejecutar</button>
-      <button class="ea stop" onclick="stopCode()">■</button>
-      <button class="ea rst" onclick="resetLevel()">↺</button>
-      <button class="ea clr" onclick="clearEditor()">🗑</button>
+    <div id="ov-win" class="ov">
+      <div class="ov-box">
+        <div class="ov-big gold">◆</div>
+        <div class="ov-title gold" id="win-t">¡NIVEL COMPLETADO!</div>
+        <p class="ov-sub" id="win-m"></p>
+        <div class="ov-worm-count" id="win-warn"></div>
+        <div class="ov-row">
+          <button class="ov-btn" onclick="nextLevel()">SIGUIENTE →</button>
+          <button class="ov-btn ghost" onclick="resetLevel()">REPETIR</button>
+        </div>
+      </div>
     </div>
-    <div class="ed-sol">
-      <button class="sol-btn" onclick="toggleSolInput()">🔑 Solución</button>
-      <div id="sol-wrap" class="sol-wrap"><input type="password" id="sol-in" placeholder="Código..." maxlength="10"><button class="sol-go" onclick="checkSol()">→</button></div>
-      <span id="sol-err" class="sol-err"></span>
+    <div id="ov-end" class="ov">
+      <div class="ov-box">
+        <div class="ov-big gold xl">◆</div>
+        <div class="ov-title gold">¡ARRAKIS CONQUISTADO!</div>
+        <p class="ov-sub">Has sobrevivido a los 10 niveles.<br>Eres un verdadero Fremen.</p>
+        <button class="ov-btn" onclick="backToMenu()">MENÚ PRINCIPAL</button>
+      </div>
     </div>
-  </div>
-</div>
-
-<!-- MODAL SOLUCIÓN (modo manual) -->
-<div id="sol-modal" class="sol-modal">
-  <div class="sol-modal-box">
-    <div class="sol-modal-head"><span>🔑 Código</span><button onclick="closeSolModal()">✕</button></div>
-    <div class="sol-modal-body">
-      <input type="password" id="sol-in2" placeholder="Código del instructor..."><button class="sol-go" onclick="checkSol2()">OK</button>
+    <div id="ov-lvl" class="ov">
+      <div class="ov-box">
+        <div class="ov-title gold" id="ann-lvl">NIVEL 1</div>
+        <div class="ov-sub blue" id="ann-name">El Primer Paso</div>
+        <div class="ov-sub" id="ann-info"></div>
+      </div>
     </div>
-    <span id="sol-err2" class="sol-err"></span>
-    <pre id="sol-reveal" class="sol-reveal"></pre>
   </div>
 </div>
 
