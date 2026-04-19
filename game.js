@@ -234,7 +234,8 @@ function movePl(dx,dy){
   else playSfx('step');
 
   const si=spice.findIndex(s=>s.x===nx&&s.y===ny);
-  if(si>=0){spice.splice(si,1);pl.sp++;score+=SCORE_SPICE;playSfx('spice')}
+  //if(si>=0){spice.splice(si,1);pl.sp++;score+=SCORE_SPICE;playSfx('spice')}
+  if(si>=0){spice.splice(si,1);pl.sp++;playSfx('spice')}
   updHUD();
   if(!hidden)for(const w of worms)for(const s of w.seg)if(s.x===pl.x&&s.y===pl.y){die();return true}
   if(spice.length===0&&pl.alive){winning=true;setTimeout(()=>winLvl(),600)}
@@ -317,19 +318,149 @@ function drDesert(){
 function drGrid(){cx.strokeStyle='rgba(0,0,0,.03)';cx.lineWidth=.5;for(let x=0;x<=W;x+=TILE){cx.beginPath();cx.moveTo(x,0);cx.lineTo(x,H);cx.stroke()}for(let y=0;y<=H;y+=TILE){cx.beginPath();cx.moveTo(0,y);cx.lineTo(W,y);cx.stroke()}}
 function drBones(){cx.globalAlpha=.07;for(const b of bones){const x=b.x*TILE+TILE/2,y=b.y*TILE+TILE/2;cx.save();cx.translate(x,y);cx.rotate(b.r);cx.strokeStyle=b.t>.5?'#d7ccc8':'#a1887f';cx.lineWidth=1.5;cx.beginPath();cx.moveTo(-7,0);cx.lineTo(7,0);cx.stroke();cx.beginPath();cx.arc(-7,0,2.5,0,Math.PI*2);cx.arc(7,0,2.5,0,Math.PI*2);cx.stroke();cx.restore()}cx.globalAlpha=1}
 
-function drMtns(){
-  const l=LV[lvl];for(const r of l.rk){
-    const x=r.x*TILE,y=r.y*TILE,mx=x+TILE/2,my=y+TILE/2,here=pl.x===r.x&&pl.y===r.y;
-    cx.globalAlpha=.2;cx.fillStyle='#1a0a00';cx.beginPath();cx.ellipse(mx+3,my+7,18,7,0,0,Math.PI*2);cx.fill();cx.globalAlpha=1;
-    cx.fillStyle=here?'#3d4f60':'#4a3c2a';cx.beginPath();cx.moveTo(x-3,y+TILE);cx.lineTo(x+5,y+10);cx.lineTo(mx-1,y-3);cx.lineTo(mx+4,y+4);cx.lineTo(x+TILE-3,y-5);cx.lineTo(x+TILE+3,y+9);cx.lineTo(x+TILE+3,y+TILE);cx.closePath();cx.fill();
-    cx.fillStyle=here?'#506878':'#6d5a3a';cx.beginPath();cx.moveTo(mx-1,y-3);cx.lineTo(mx+4,y+4);cx.lineTo(x+TILE-3,y-5);cx.lineTo(x+TILE+3,y+9);cx.lineTo(x+TILE+3,y+TILE);cx.lineTo(mx,y+TILE);cx.closePath();cx.fill();
-    cx.fillStyle='#c8b8a8';cx.globalAlpha=.5;
-    cx.beginPath();cx.moveTo(mx-1,y-3);cx.lineTo(mx+3,y+3);cx.lineTo(mx-5,y+5);cx.closePath();cx.fill();
-    cx.beginPath();cx.moveTo(x+TILE-3,y-5);cx.lineTo(x+TILE+1,y+2);cx.lineTo(x+TILE-7,y+3);cx.closePath();cx.fill();cx.globalAlpha=1;
-    if(here){cx.globalAlpha=.12+Math.sin(ft*.06)*.06;cx.strokeStyle='#4fc3f7';cx.lineWidth=2;cx.setLineDash([4,3]);cx.beginPath();cx.arc(mx,my,22,0,Math.PI*2);cx.stroke();cx.setLineDash([]);cx.globalAlpha=1}
-    else if(Math.abs(pl.x-r.x)<=2&&Math.abs(pl.y-r.y)<=2){cx.globalAlpha=.18+Math.sin(ft*.08)*.08;cx.fillStyle='#4fc3f7';cx.font='9px Rajdhani';cx.textAlign='center';cx.fillText('⛰',mx,y+TILE+9);cx.globalAlpha=1}
-  }
+// function drMtns(){
+//   const l=LV[lvl];for(const r of l.rk){
+//     const x=r.x*TILE,y=r.y*TILE,mx=x+TILE/2,my=y+TILE/2,here=pl.x===r.x&&pl.y===r.y;
+//     cx.globalAlpha=.2;cx.fillStyle='#1a0a00';cx.beginPath();cx.ellipse(mx+3,my+7,18,7,0,0,Math.PI*2);cx.fill();cx.globalAlpha=1;
+//     cx.fillStyle=here?'#3d4f60':'#4a3c2a';cx.beginPath();cx.moveTo(x-3,y+TILE);cx.lineTo(x+5,y+10);cx.lineTo(mx-1,y-3);cx.lineTo(mx+4,y+4);cx.lineTo(x+TILE-3,y-5);cx.lineTo(x+TILE+3,y+9);cx.lineTo(x+TILE+3,y+TILE);cx.closePath();cx.fill();
+//     cx.fillStyle=here?'#506878':'#6d5a3a';cx.beginPath();cx.moveTo(mx-1,y-3);cx.lineTo(mx+4,y+4);cx.lineTo(x+TILE-3,y-5);cx.lineTo(x+TILE+3,y+9);cx.lineTo(x+TILE+3,y+TILE);cx.lineTo(mx,y+TILE);cx.closePath();cx.fill();
+//     cx.fillStyle='#c8b8a8';cx.globalAlpha=.5;
+//     cx.beginPath();cx.moveTo(mx-1,y-3);cx.lineTo(mx+3,y+3);cx.lineTo(mx-5,y+5);cx.closePath();cx.fill();
+//     cx.beginPath();cx.moveTo(x+TILE-3,y-5);cx.lineTo(x+TILE+1,y+2);cx.lineTo(x+TILE-7,y+3);cx.closePath();cx.fill();cx.globalAlpha=1;
+//     if(here){cx.globalAlpha=.12+Math.sin(ft*.06)*.06;cx.strokeStyle='#4fc3f7';cx.lineWidth=2;cx.setLineDash([4,3]);cx.beginPath();cx.arc(mx,my,22,0,Math.PI*2);cx.stroke();cx.setLineDash([]);cx.globalAlpha=1}
+//     else if(Math.abs(pl.x-r.x)<=2&&Math.abs(pl.y-r.y)<=2){cx.globalAlpha=.18+Math.sin(ft*.08)*.08;cx.fillStyle='#4fc3f7';cx.font='9px Rajdhani';cx.textAlign='center';cx.fillText('⛰',mx,y+TILE+9);cx.globalAlpha=1}
+//   }
+// }
+
+function drMtns() {
+  const l = LV[lvl];
+  l.rk.forEach(r => {
+    const x = r.x * TILE + TILE / 2;
+    const y = r.y * TILE + TILE / 2;
+    const isInside = pl.x === r.x && pl.y === r.y;
+    const radius = TILE * 0.7; // Un poco más grande que la celda para que se vea imponente
+
+    // 1. SOMBRA BASE (Sutil para separar la duna del suelo plano)
+    cx.beginPath();
+    cx.ellipse(x + 4, y + 4, radius, radius * 0.8, 0, 0, Math.PI * 2);
+    cx.fillStyle = 'rgba(0,0,0,0.15)';
+    cx.fill();
+
+    // 2. CUERPO DE LA DUNA (Degradado Radial para efecto 3D)
+    // El punto de luz está arriba a la izquierda
+    const g = cx.createRadialGradient(x - 5, y - 5, 2, x, y, radius);
+    
+    if (isInside) {
+      // Color cuando estás oculto (tono más frío/fresco, como sombra profunda)
+      g.addColorStop(0, '#506878');
+      g.addColorStop(0.7, '#2c3e50');
+      g.addColorStop(1, '#1a252f');
+    } else {
+      // Color de duna normal (arena bajo el sol)
+      g.addColorStop(0, '#f5e6c8'); // Cima iluminada
+      g.addColorStop(0.5, '#d4a853'); // Cuerpo
+      g.addColorStop(1, '#b8860b');   // Base en sombra
+    }
+
+    cx.beginPath();
+    cx.arc(x, y, radius, 0, Math.PI * 2);
+    cx.fillStyle = g;
+    cx.fill();
+
+    // 3. TEXTURA DE ONDAS DE VIENTO (Sand Ripples)
+    cx.strokeStyle = 'rgba(255,255,255,0.15)';
+    cx.lineWidth = 1;
+    for (let i = -2; i <= 2; i++) {
+      cx.beginPath();
+      cx.arc(x, y + (i * 4), radius * 0.8, Math.PI * 0.2, Math.PI * 0.8);
+      cx.stroke();
+    }
+
+    // 4. INDICADOR DE REFUGIO (Solo si el jugador está cerca o dentro)
+    const dist = Math.abs(pl.x - r.x) + Math.abs(pl.y - r.y);
+    if (dist <= 1 || isInside) {
+      cx.save();
+      cx.beginPath();
+      cx.setLineDash([2, 4]);
+      cx.strokeStyle = isInside ? '#4fc3f7' : 'rgba(255,255,255,0.3)';
+      cx.arc(x, y, radius + 3, 0, Math.PI * 2);
+      cx.stroke();
+      cx.restore();
+    }
+
+    // 5. BRILLO DE "ZONA SEGURA"
+    if (isInside) {
+      cx.shadowBlur = 15;
+      cx.shadowColor = '#4fc3f7';
+      // Dibujamos un anillo muy fino para el glow
+      cx.beginPath();
+      cx.arc(x, y, radius - 2, 0, Math.PI * 2);
+      cx.strokeStyle = 'rgba(79, 195, 247, 0.5)';
+      cx.stroke();
+      cx.shadowBlur = 0;
+    }
+  });
 }
+
+// function drMtns() {
+//   const l = LV[lvl];
+//   l.rk.forEach(r => {
+//     const x = r.x * TILE;
+//     const y = r.y * TILE;
+//     const mx = x + TILE / 2;
+//     const my = y + TILE / 2;
+//     const isInside = pl.x === r.x && pl.y === r.y;
+
+//     // 1. SOMBRA PROYECTADA EN EL SUELO
+//     cx.fillStyle = 'rgba(0,0,0,0.3)';
+//     cx.beginPath();
+//     cx.ellipse(mx + 5, y + TILE, 20, 8, 0, 0, Math.PI * 2);
+//     cx.fill();
+
+//     // 2. CUERPO DE LA MONTAÑA (Cara de Sombra - Basalto)
+//     cx.fillStyle = isInside ? '#2c3e50' : '#2d241a'; // Azulado si estás oculto
+//     cx.beginPath();
+//     cx.moveTo(x - 5, y + TILE);       // Base izquierda
+//     cx.lineTo(mx, y - 10);            // Cima
+//     cx.lineTo(x + TILE + 5, y + TILE); // Base derecha
+//     cx.closePath();
+//     cx.fill();
+
+//     // 3. CARA DE LUZ (Efecto 3D afilado)
+//     cx.fillStyle = isInside ? '#34495e' : '#4a3c2a';
+//     cx.beginPath();
+//     cx.moveTo(mx, y - 10);            // Cima
+//     cx.lineTo(mx + 12, y + TILE);     // Hacia la derecha
+//     cx.lineTo(mx - 2, y + TILE - 5);  // Corte irregular
+//     cx.closePath();
+//     cx.fill();
+
+//     // 4. DETALLE DE ARENA EN LA BASE (Integración con el mapa)
+//     const sandG = cx.createLinearGradient(0, y + TILE - 5, 0, y + TILE);
+//     sandG.addColorStop(0, 'transparent');
+//     sandG.addColorStop(1, '#c9952a');
+//     cx.fillStyle = sandG;
+//     cx.fillRect(x - 5, y + TILE - 5, TILE + 10, 6);
+
+//     // 5. EFECTO DE OCULTAMIENTO (Feedback visual)
+//     if (isInside) {
+//       // Pulso azul "Capa de Invisibilidad / Máscara Térmica"
+//       cx.strokeStyle = '#4fc3f7';
+//       cx.lineWidth = 2;
+//       cx.setLineDash([4, 4]);
+//       cx.beginPath();
+//       cx.arc(mx, my, 22 + Math.sin(ft * 0.1) * 2, 0, Math.PI * 2);
+//       cx.stroke();
+//       cx.setLineDash([]);
+      
+//       // Brillo sutil en la roca
+//       cx.globalAlpha = 0.2;
+//       cx.fillStyle = '#4fc3f7';
+//       cx.fill();
+//       cx.globalAlpha = 1.0;
+//     }
+//   });
+// }
 
 function drSpice(){
   for(const s of spice){
